@@ -2,8 +2,7 @@ pipeline {
     agent any
 
     environment {
-
-        AWS_DEFAULT_REGION    = 'ap-southeast-1'
+        AWS_DEFAULT_REGION = 'ap-southeast-1'
     }
 
     stages {
@@ -16,11 +15,17 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                dir('terraform') {
-                    sh 'terraform init'
+                withCredentials([
+                    string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    dir('terraform') {
+                        sh 'terraform init'
+                    }
                 }
             }
         }
+
         stage('Terraform Plan') {
             steps {
                 withCredentials([
@@ -40,7 +45,7 @@ pipeline {
             }
         }
 
-             stage('Terraform Apply') {
+        stage('Terraform Apply') {
             steps {
                 withCredentials([
                     string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
@@ -51,7 +56,7 @@ pipeline {
                     }
                 }
             }
-             }
+        }
     }
 
     post {
